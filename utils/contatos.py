@@ -18,7 +18,16 @@ def widget_contatos_extras(lead_id: int, usuario_atual: dict):
     if extras:
         st.markdown("**📞 Telefones adicionais:**")
         for e in extras:
-            ts = str(e.get("criado_em",""))[:16].replace("T"," ")
+            from datetime import timezone, timedelta
+        gmt3 = timezone(timedelta(hours=-3))
+        criado = e.get("criado_em")
+        if criado:
+            if hasattr(criado, 'astimezone'):
+                ts = criado.astimezone(gmt3).strftime("%d/%m/%Y %H:%M")
+            else:
+                ts = str(criado)[:16].replace("T"," ")
+        else:
+            ts = "—"
             c1, c2 = st.columns([5, 1])
             obs = f" — *{e['observacao']}*" if e.get("observacao") else ""
             c1.markdown(

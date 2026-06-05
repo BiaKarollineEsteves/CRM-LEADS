@@ -16,7 +16,13 @@ def widget_contatos_extras(lead_id, usuario_atual):
     if extras:
         st.markdown("**📞 Telefones adicionais:**")
         for e in extras:
-            ts = str(e.get("criado_em",""))[:16].replace("T"," ")
+            from datetime import timezone, timedelta
+        gmt3 = timezone(timedelta(hours=-3))
+        criado = e.get("criado_em")
+        if criado and hasattr(criado, "astimezone"):
+            ts = criado.astimezone(gmt3).strftime("%d/%m/%Y %H:%M")
+        else:
+            ts = str(criado or "")[:16].replace("T"," ")
             c1,c2 = st.columns([5,1])
             obs = f" — *{e['observacao']}*" if e.get("observacao") else ""
             c1.markdown(
@@ -50,6 +56,7 @@ def widget_contatos_extras(lead_id, usuario_atual):
                     if obs_tel.strip(): msg += f" ({obs_tel.strip()})"
                     X("INSERT INTO notificacoes (usuario_id, lead_id, mensagem) VALUES (%s,%s,%s)",
                       (vid, lead_id, msg))
+            st.cache_data.clear()
             st.success(f"✅ Telefone {novo_tel} adicionado!")
             st.rerun()
 

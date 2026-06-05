@@ -134,7 +134,10 @@ if pg=="🎯 Minha Carteira":
                 with t1:
                     cs=Q("SELECT c.texto,c.criado_em,u.nome autor FROM comentarios c LEFT JOIN usuarios u ON c.usuario_id=u.id WHERE c.lead_id=%s ORDER BY c.criado_em",(row["id"],))
                     for c in cs:
-                        ts=str(c.get("criado_em",""))[:16].replace("T"," ")
+                        from datetime import timezone, timedelta
+                        gmt3=timezone(timedelta(hours=-3))
+                        criado=c.get("criado_em")
+                        ts=criado.astimezone(gmt3).strftime("%d/%m/%Y %H:%M") if criado and hasattr(criado,"astimezone") else str(criado or "")[:16].replace("T"," ")
                         st.markdown(f'<div class="tl"><strong>{c.get("autor","—")}</strong> <span style="color:#94a3b8;font-size:12px">{ts}</span><br>{c["texto"]}</div>',unsafe_allow_html=True)
                     nc=st.text_input("",placeholder="Novo comentário...",key=f"nc{row['id']}",label_visibility="collapsed")
                     if st.button("📤 Enviar",key=f"ev{row['id']}") and nc.strip():
@@ -145,7 +148,10 @@ if pg=="🎯 Minha Carteira":
                     hs=Q("SELECT h.anotacao,h.criado_em,s.nome st,s.cor cor,u.nome autor FROM historico_status h LEFT JOIN status_leads s ON h.status_id=s.id LEFT JOIN usuarios u ON h.usuario_id=u.id WHERE h.lead_id=%s ORDER BY h.criado_em DESC",(row["id"],))
                     if not hs: st.caption("Sem histórico.")
                     for h in hs:
-                        ts=str(h.get("criado_em",""))[:16].replace("T"," ")
+                        from datetime import timezone, timedelta
+                        gmt3=timezone(timedelta(hours=-3))
+                        criado=h.get("criado_em")
+                        ts=criado.astimezone(gmt3).strftime("%d/%m/%Y %H:%M") if criado and hasattr(criado,"astimezone") else str(criado or "")[:16].replace("T"," ")
                         st.markdown(f'<div class="tl" style="border-color:{h.get("cor","#6B7280")}"><strong style="color:{h.get("cor","#6B7280")}">{h.get("st","—")}</strong> <span style="color:#94a3b8;font-size:12px">por {h.get("autor","—")} em {ts}</span>{"<br><em>"+h["anotacao"]+"</em>" if h.get("anotacao") else ""}</div>',unsafe_allow_html=True)
                 with t3:
                     widget_contatos_extras(row["id"], u)
