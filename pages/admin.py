@@ -1,3 +1,4 @@
+# v2 - com telefones extras
 """pages/admin.py — Painel Administrador"""
 import streamlit as st, pandas as pd, hashlib
 from components.layout import css, header, sidebar
