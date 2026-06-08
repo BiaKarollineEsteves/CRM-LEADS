@@ -8,6 +8,7 @@ from utils.db import Q, Q1, X, XM
 from utils.excel import ler, template
 
 def widget_contatos_extras(lead_id, usuario_atual):
+    from datetime import timedelta
     extras = Q(
         "SELECT ce.id, ce.telefone, ce.observacao, ce.criado_em, u.nome autor "
         "FROM contatos_extras ce LEFT JOIN usuarios u ON ce.adicionado_por=u.id "
@@ -16,10 +17,9 @@ def widget_contatos_extras(lead_id, usuario_atual):
     if extras:
         st.markdown("**📞 Telefones adicionais:**")
         for e in extras:
-            from datetime import timedelta
-        _c = e.get("criado_em")
-        ts = (_c - timedelta(hours=3)).strftime("%d/%m/%Y %H:%M") if _c else "—"
-            c1,c2 = st.columns([5,1])
+            _c = e.get("criado_em")
+            ts = (_c - timedelta(hours=3)).strftime("%d/%m/%Y %H:%M") if _c else "—"
+            c1, c2 = st.columns([5, 1])
             obs = f" — *{e['observacao']}*" if e.get("observacao") else ""
             c1.markdown(
                 f'<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:7px;'
@@ -27,13 +27,13 @@ def widget_contatos_extras(lead_id, usuario_atual):
                 f'📞 <strong>{e["telefone"]}</strong>{obs} '
                 f'<span style="color:#94a3b8;font-size:11px;">— {e.get("autor","—")} em {ts}</span>'
                 f'</div>', unsafe_allow_html=True)
-            if c2.button("🗑️", key=f"del_ct_{e['id']}_{lead_id}"):
+            if c2.button("🗑️", key=f"del_ct_{e["id"]}_{lead_id}"):
                 X("DELETE FROM contatos_extras WHERE id=%s", (e["id"],))
                 st.rerun()
     else:
         st.caption("Nenhum telefone adicional ainda.")
     with st.form(key=f"form_ct_{lead_id}"):
-        c1,c2 = st.columns([2,3])
+        c1, c2 = st.columns([2, 3])
         novo_tel = c1.text_input("Novo telefone", placeholder="(XX) XXXXX-XXXX")
         obs_tel  = c2.text_input("Observação", placeholder="Ex: WhatsApp, vizinho...")
         salvar   = st.form_submit_button("➕ Adicionar telefone", type="primary")
